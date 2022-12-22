@@ -1,48 +1,30 @@
 #!/usr/bin/python3
-import os.path
-from fabric.api import env
-from fabric.api import put
-from fabric.api import run
+from fabric.api import put, run, env
+import os
 
-env.hosts = ["104.196.168.90", "35.196.46.172"]
+
+env.hosts = ['142.44.167.246', '144.217.246.220']
 
 
 def do_deploy(archive_path):
-    """Distributes an archive to a web server.
-
-    Args:
-        archive_path (str): The path of the archive to distribute.
-    Returns:
-        If the file doesn't exist at archive_path or an error occurs - False.
-        Otherwise - True.
     """
-    if os.path.isfile(archive_path) is False:
+    Distribute archive to web servers
+    """
+    if not os.path.exists(archive_path):
         return False
-    file = archive_path.split("/")[-1]
-    name = file.split(".")[0]
-
-    if put(archive_path, "/tmp/{}".format(file)).failed is True:
+    filename = os.path.basename(archive_path)
+    tmp_tar = "/tmp/{}".format(filename)
+    name, ext = os.path.splitext(filename)
+    new_folder = "/data/web_static/releases/{}".format(name)
+    try:
+        put(archive_path, tmp_tar)
+        run("mkdir -p {}".format(new_folder))
+        run("tar -xzf {} -C {}".format(tmp_tar, new_folder))
+        run("rm {}".format(tmp_tar))
+        run("mv {}/web_static/* {}/".format(new_folder, new_folder))
+        run("rm -rf {}/web_static".format(new_folder))
+        run("rm -rf /data/web_static/current")
+        run("ln -s {} /data/web_static/current".format(new_folder))
+        return True
+    except:
         return False
-    if run("rm -rf /data/web_static/releases/{}/".
-           format(name)).failed is True:
-        return False
-    if run("mkdir -p /data/web_static/releases/{}/".
-           format(name)).failed is True:
-        return False
-    if run("tar -xzf /tmp/{} -C /data/web_static/releases/{}/".
-           format(file, name)).failed is True:
-        return False
-    if run("rm /tmp/{}".format(file)).failed is True:
-        return False
-    if run("mv /data/web_static/releases/{}/web_static/* "
-           "/data/web_static/releases/{}/".format(name, name)).failed is True:
-        return False
-    if run("rm -rf /data/web_static/releases/{}/web_static".
-           format(name)).failed is True:
-        return False
-    if run("rm -rf /data/web_static/current").failed is True:
-        return False
-    if run("ln -s /data/web_static/releases/{}/ /data/web_static/current".
-           format(name)).failed is True:
-        return False
-    return True
