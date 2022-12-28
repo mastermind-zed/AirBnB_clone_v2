@@ -49,4 +49,4 @@ This repository contains the initial stage of a student project to build a clone
     * quit - Exits the program (EOF will as well)
 
 Authors
-Caleb 
+Cale
