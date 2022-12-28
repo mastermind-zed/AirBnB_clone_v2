@@ -50,4 +50,4 @@ This repository contains the initial stage of a student project to build a clone
 
 Authors
 Caleb Makafui <KojoMarko>
-Blessing Tetteh <Blessingdev233>
+Blessing Tetteh
